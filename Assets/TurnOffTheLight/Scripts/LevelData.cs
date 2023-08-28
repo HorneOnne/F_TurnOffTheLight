@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace TurnOffTheLight
 {
@@ -16,5 +17,9 @@ namespace TurnOffTheLight
         [Header("Grid size")]
         public int Width;
         public int Height;
+        public int MinShuffle;
+        public int MaxShuffle;
     }
+
+  
 }

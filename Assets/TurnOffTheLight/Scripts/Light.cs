@@ -15,7 +15,7 @@ namespace TurnOffTheLight
         }
 
         #region Properties
-        [field: SerializeField] public LightState State { get; set; }
+        [field: SerializeField] public LightState State { get; private set; } = LightState.On;
         #endregion
 
 
@@ -26,17 +26,45 @@ namespace TurnOffTheLight
 
         private void Start()
         {
-            
+            UpdateLightVisual();
+        }
+
+
+        public void ToggleLight()
+        {
+            if(State == LightState.On)
+            {
+                SetOffState();
+            }
+            else
+            {
+                SetOnState();
+            }
         }
 
         public void SetOnState()
         {
+            State = LightState.On;
             _sr.color = _onColor;
         }
 
         public void SetOffState()
         {
+            State = LightState.Off;
             _sr.color = _offColor;
+        }
+
+
+        private void UpdateLightVisual()
+        {
+            if (State == LightState.On)
+            {
+                _sr.color = _onColor;
+            }
+            else
+            {
+                _sr.color = _offColor;
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ namespace TurnOffTheLight
     public class GridSystem : MonoBehaviour
     {
         public static GridSystem Instance { get; private set; }
+        
 
         [Header("References")]
         [SerializeField] private Light _lightPrefab;
@@ -14,14 +15,17 @@ namespace TurnOffTheLight
         [Header("Data")]
         [SerializeField] private LevelData _levelData;
 
-        [Header("Properties")]
-        [SerializeField] private float _cellSize = 0.2f;
 
+        public float CellSize { get; private set; } = 1.4f;
 
         // Cached
-        private Light[] _gridMap;
-        public Transform Selection;
+        public Light[] GridMap { get; private set; }
+  
 
+        #region Properties
+        public LevelData LevelData { get => _levelData; }
+
+        #endregion
         private void Awake()
         {
             Instance = this;
@@ -33,54 +37,23 @@ namespace TurnOffTheLight
         {
             LoadLevelData();
             CreateGrid();
+            StartCoroutine(PerformShuffleGrid(Random.Range(LevelData.MinShuffle, LevelData.MaxShuffle), 0.1f, ()=>
+            {
+                
+            }));  
         }
+ 
 
-
-        private void Update()
+        public Light[] GetFourLights(int fromIndex)
         {
-            if (Input.GetMouseButton(0))
-            {
-                Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int gridWidth = _levelData.Width;
+            Light[] lights = new Light[4];
+            lights[0] = GridMap[fromIndex];
+            lights[1] = GridMap[fromIndex + 1];
+            lights[2] = GridMap[fromIndex + gridWidth];
+            lights[3] = GridMap[fromIndex + 1 + gridWidth];
 
-                int gridWidth = _levelData.Width; // Define your grid width
-                int gridHeight = _levelData.Height; // Define your grid height
-
-                int rowIndex = Mathf.FloorToInt(mouseWorldPos.y / _cellSize);
-                int columnIndex = Mathf.FloorToInt(mouseWorldPos.x / _cellSize);
-
-                int clampedRowIndex = Mathf.Clamp(rowIndex, 0, gridHeight - 2);
-                int clampedColumnIndex = Mathf.Clamp(columnIndex, 0, gridWidth - 2);
-
-                int index = clampedRowIndex * gridWidth + clampedColumnIndex;
-
-                if (index >= 0 && index < _gridMap.Length)
-                {
-                    Vector3 topLeft = new Vector3(clampedColumnIndex * _cellSize, clampedRowIndex * _cellSize, 0);
-                    Vector3 topRight = new Vector3((clampedColumnIndex + 1) * _cellSize, clampedRowIndex * _cellSize, 0);
-                    Vector3 bottomLeft = new Vector3(clampedColumnIndex * _cellSize, (clampedRowIndex + 1) * _cellSize, 0);
-                    Vector3 bottomRight = new Vector3((clampedColumnIndex + 1) * _cellSize, (clampedRowIndex + 1) * _cellSize, 0);
-
-                    //Debug.DrawLine(topLeft, topRight, Color.red);
-                    //Debug.DrawLine(topRight, bottomRight, Color.green);
-                    //Debug.DrawLine(bottomRight, bottomLeft, Color.blue);
-                    //Debug.DrawLine(bottomLeft, topLeft, Color.cyan);
-
-                    //_gridMap[index].SetOnState();
-                    //_gridMap[index + 1].SetOnState();
-                    //_gridMap[index + gridWidth].SetOnState();
-                    //_gridMap[index + 1 + gridWidth].SetOnState();
-
-                    Selection.transform.position = topLeft;
-                }
-            }
-
-            if(Input.GetMouseButtonUp(0))
-            {
-                //for(int i = 0;i < _gridMap.Length;i++)
-                //{
-                //    _gridMap[i].SetOffState();
-                //}
-            }
+            return lights;
         }
 
         private void LoadLevelData()
@@ -93,7 +66,7 @@ namespace TurnOffTheLight
             Vector3 newPosition = new Vector3(mainCam.transform.position.x + _levelData.CameraOffset.x, mainCam.transform.position.y + _levelData.CameraOffset.y, mainCam.transform.position.z);
             mainCam.transform.position = newPosition;
 
-            _gridMap = new Light[_levelData.Width * _levelData.Height];
+            GridMap = new Light[_levelData.Width * _levelData.Height];
         }
 
         private void CreateGrid()
@@ -102,16 +75,63 @@ namespace TurnOffTheLight
             int columns = _levelData.Height;
 
             // Calculate the center position of the nodes.
-            Vector3 centerOffset = new Vector3((columns - 1) * _cellSize * 0.5f, -(rows - 1) * _cellSize * 0.5f, 0f);
+            Vector3 centerOffset = new Vector3((columns - 1) * CellSize * 0.5f, -(rows - 1) * CellSize * 0.5f, 0f);
 
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    Vector3 position = new Vector3(i * _cellSize, j * _cellSize, 0f);
-                    _gridMap[i + rows * j] = Instantiate(_lightPrefab, position, Quaternion.identity, this.transform);
+                    Vector3 position = new Vector3(i * CellSize, j * CellSize, 0f);
+                    GridMap[i + rows * j] = Instantiate(_lightPrefab, position, Quaternion.identity, this.transform);
                 }
             }
+        }
+
+
+        private IEnumerator PerformShuffleGrid(int times, float timeEachShuffle, System.Action OnFhuffleFinished)
+        {
+            for(int i = 0;i < times; i++)
+            {
+                int index = GetRandomIndex(_levelData.Width, _levelData.Height);
+                Light[] lightsNB = GetFourLights(index);
+
+                foreach(var light in lightsNB)
+                {
+                    light.ToggleLight();
+                }
+
+                yield return new WaitForSeconds(timeEachShuffle);
+            }
+
+            OnFhuffleFinished?.Invoke();
+        }
+
+
+        private int GetRandomIndex(int width, int height)
+        {
+            int maxWidth = width - 1;
+            int maxHeight = height - 1;
+
+            int randomWidth = Random.Range(0, maxWidth);
+            int randomHeight = Random.Range(0, maxHeight);
+            int index = randomWidth + width * randomHeight;
+            return index;
+        }
+
+
+        public bool CheckWinCondition()
+        {
+            Light.LightState firstLightState = GridMap[0].State;
+
+            for(int i = 1; i < GridMap.Length; i++)
+            {
+                if (GridMap[i].State != firstLightState)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
