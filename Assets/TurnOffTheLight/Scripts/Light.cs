@@ -7,6 +7,8 @@ namespace TurnOffTheLight
         [SerializeField] private Color _onColor;
         [SerializeField] private Color _offColor;
 
+        private SpriteRenderer _sr;
+
         public enum LightState
         {
             On, Off
@@ -17,9 +19,24 @@ namespace TurnOffTheLight
         #endregion
 
 
+        private void Awake()
+        {
+            _sr = GetComponent<SpriteRenderer>();
+        }
+
         private void Start()
         {
             
+        }
+
+        public void SetOnState()
+        {
+            _sr.color = _onColor;
+        }
+
+        public void SetOffState()
+        {
+            _sr.color = _offColor;
         }
     }
 }

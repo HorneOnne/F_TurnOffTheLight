@@ -15,6 +15,6 @@ MonoBehaviour:
   Level: 1
   IsLocking: 0
   OrthographicCameraSize: 9.5
-  CameraOffset: {x: 0, y: 0}
+  CameraOffset: {x: 2.6, y: 4}
   Width: 5
   Height: 5
