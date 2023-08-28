@@ -7,7 +7,7 @@ namespace TurnOffTheLight
         public static UIGameplayManager Instance { get; private set; }
 
         public UIGameplay UIGameplay;
-        public UIOptions UIOptions;
+        public UIWin UIWin;
 
 
         private void Awake()
@@ -25,7 +25,7 @@ namespace TurnOffTheLight
         public void CloseAll()
         {
             DisplayGameplayMenu(false);
-            DisplayOptionsMenu(false);
+            DisplayWinMenu(false);
         }
 
 
@@ -34,9 +34,9 @@ namespace TurnOffTheLight
             UIGameplay.DisplayCanvas(isActive);
         }
 
-        public void DisplayOptionsMenu(bool isActive)
+        public void DisplayWinMenu(bool isActive)
         {
-            UIOptions.DisplayCanvas(isActive);
+            UIWin.DisplayCanvas(isActive);
         }
 
     }

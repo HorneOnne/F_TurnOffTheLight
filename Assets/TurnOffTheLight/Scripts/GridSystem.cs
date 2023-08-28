@@ -7,7 +7,7 @@ namespace TurnOffTheLight
     public class GridSystem : MonoBehaviour
     {
         public static GridSystem Instance { get; private set; }
-        
+        public event System.Action OnFinishShuffleGrid;
 
         [Header("References")]
         [SerializeField] private Light _lightPrefab;
@@ -24,6 +24,7 @@ namespace TurnOffTheLight
 
         #region Properties
         public LevelData LevelData { get => _levelData; }
+        public bool IsFinishShuffle { get; private set; } = false;
 
         #endregion
         private void Awake()
@@ -37,9 +38,9 @@ namespace TurnOffTheLight
         {
             LoadLevelData();
             CreateGrid();
-            StartCoroutine(PerformShuffleGrid(Random.Range(LevelData.MinShuffle, LevelData.MaxShuffle), 0.1f, ()=>
-            {
-                
+            StartCoroutine(PerformShuffleGrid(Random.Range(LevelData.MinShuffle, LevelData.MaxShuffle), 0.05f, ()=>
+            {             
+                OnFinishShuffleGrid?.Invoke();
             }));  
         }
  
@@ -59,7 +60,7 @@ namespace TurnOffTheLight
         private void LoadLevelData()
         {
             // Load Levedata from GameManger.
-            //this._levelData = GameManager.Instance.PlayingLevelData;
+            this._levelData = GameManager.Instance.PlayingLevelData;
 
             var mainCam = Camera.main;
             mainCam.orthographicSize = _levelData.OrthographicCameraSize;
@@ -90,7 +91,8 @@ namespace TurnOffTheLight
 
         private IEnumerator PerformShuffleGrid(int times, float timeEachShuffle, System.Action OnFhuffleFinished)
         {
-            for(int i = 0;i < times; i++)
+            IsFinishShuffle = false;
+            for (int i = 0;i < times; i++)
             {
                 int index = GetRandomIndex(_levelData.Width, _levelData.Height);
                 Light[] lightsNB = GetFourLights(index);
@@ -103,6 +105,7 @@ namespace TurnOffTheLight
                 yield return new WaitForSeconds(timeEachShuffle);
             }
 
+            IsFinishShuffle = true;
             OnFhuffleFinished?.Invoke();
         }
 
@@ -132,6 +135,22 @@ namespace TurnOffTheLight
             }
 
             return true;
+        }
+
+
+        public void Stwitch()
+        {
+            StopAllCoroutines();
+
+            foreach (var light in GridMap)
+            {
+                light.SetOnState();
+            }
+
+            StartCoroutine(PerformShuffleGrid(Random.Range(LevelData.MinShuffle, LevelData.MaxShuffle), 0.05f, () =>
+            {
+                OnFinishShuffleGrid?.Invoke();
+            }));
         }
     }
 }

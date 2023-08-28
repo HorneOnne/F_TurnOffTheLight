@@ -9,16 +9,17 @@ namespace TurnOffTheLight
         public static event System.Action OnScoreUp;
 
         // SCORE & BEST
-        private int _score;
-        private int _bestScore;
+        private int _bestMove = int.MaxValue;
+        private float _bestTime = float.MaxValue;
 
 
         public List<LevelData> LevelData;
         public LevelData PlayingLevelData;
 
         #region Properties
-        public int Score { get => _score; }
-        public int BestScore { get => _bestScore; }
+        public int BestMove { get => _bestMove; }
+        public float BestTime { get => _bestTime; }
+
         #endregion
         private void Awake()
         {
@@ -45,29 +46,19 @@ namespace TurnOffTheLight
         }
 
 
-        public void ScoreUp()
+        public void SetBestMove(int move)
         {
-            _score++;
-            OnScoreUp?.Invoke();
-        }
-
-        public void ScoreUp(int value)
-        {
-            _score+= value;
-            OnScoreUp?.Invoke();
-        }
-
-        public void ResetScore()
-        {
-            this._score = 0; 
-        }
-
-        public void SetBestScore(int score)
-        {
-            this._score = score;
-            if (_bestScore < score)
+            if (move < _bestMove)
             {
-                _bestScore = score;
+                _bestMove = move;
+            }
+        }
+
+        public void SetBestTime(float time)
+        {
+            if (time < _bestTime)
+            {
+                _bestTime = time;
             }
         }
     }

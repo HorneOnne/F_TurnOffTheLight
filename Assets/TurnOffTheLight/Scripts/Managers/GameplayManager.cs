@@ -9,6 +9,7 @@ namespace TurnOffTheLight
         public static event System.Action OnPlaying;
         public static event System.Action OnWin;
         public static event System.Action OnGameOver;
+        public static event System.Action OnWaiting;
 
         public enum GameState
         {
@@ -36,7 +37,6 @@ namespace TurnOffTheLight
         private void Awake()
         {
             Instance = this;
-            GameManager.Instance.ResetScore();
         }
 
         private void OnEnable()
@@ -70,11 +70,8 @@ namespace TurnOffTheLight
             {
                 default: break;
                 case GameState.WAITING:
-                    StartCoroutine(Utilities.WaitAfter(waitTimeBeforePlaying, () =>
-                    {
-                        GameManager.Instance.ResetScore();
-                        ChangeGameState(GameState.PLAYING);
-                    }));
+
+                    OnWaiting?.Invoke();
                     break;
                 case GameState.PLAYING:
                     Time.timeScale = 1.0f;
@@ -83,6 +80,15 @@ namespace TurnOffTheLight
                     break;
                 case GameState.WIN:
 
+                    SoundManager.Instance.PlaySound(SoundType.Win, false);
+                    GameManager.Instance.SetBestMove(InputHanlder.Instance.MoveCount);
+                    GameManager.Instance.SetBestTime(TimerManager.Instance.Time);
+
+                    StartCoroutine(Utilities.WaitAfter(0.5f, () =>
+                    {
+                        UIGameplayManager.Instance.CloseAll();
+                        UIGameplayManager.Instance.DisplayWinMenu(true);
+                    }));
 
                     OnWin?.Invoke();
                     break;

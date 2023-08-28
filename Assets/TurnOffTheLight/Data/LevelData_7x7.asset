@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Level: 1
   IsLocking: 0
-  OrthographicCameraSize: 9.5
-  CameraOffset: {x: 2.6, y: 3}
+  OrthographicCameraSize: 12
+  CameraOffset: {x: 4.15, y: 4}
   Width: 7
   Height: 7
-  MinShuffle: 7
-  MaxShuffle: 10
+  MinShuffle: 15
+  MaxShuffle: 25
