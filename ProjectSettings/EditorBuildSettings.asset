@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/TurnOffTheLight/Scenes/MenuScene.unity
+    guid: ac06a12cec70ec64ca71a5a7200a4308
+  - enabled: 1
     path: Assets/TurnOffTheLight/Scenes/GameplayScene.unity
     guid: 3fc8acdd13e6c734bafef6554d6fdbcd
   m_configObjects:
